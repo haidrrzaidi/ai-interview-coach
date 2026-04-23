@@ -10,12 +10,27 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #0b1020 0%, #141b3a 50%, #1b2d8c 100%);
-  color: #e6eaff;
+  background-color: #0b0f19;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 25%);
+  background-attachment: fixed;
+  color: #f8fafc;
   min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: 
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(79, 70, 229, 0.08), transparent 40%);
+  z-index: -1;
+  animation: pulseSubtle 8s alternate infinite;
 }
 
 code {
@@ -23,25 +38,31 @@ code {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-::-webkit-scrollbar-thumb { background: rgba(64,102,255,0.4); border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(64,102,255,0.7); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.7); }
 
 @layer components {
   .card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
+    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-semibold shadow-lg shadow-brand-900/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply relative inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 active:from-brand-700 active:to-brand-600 text-white font-bold tracking-wide shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none overflow-hidden;
+  }
+  .btn-primary::after {
+    @apply content-[''] absolute top-0 left-[-100%] w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] transition-all duration-500;
+  }
+  .btn-primary:not(:disabled):hover::after {
+    @apply left-[200%];
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3.5 bg-slate-800/50 hover:bg-slate-700/50 text-white font-bold tracking-wide border border-white/10 hover:border-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .input {
-    @apply w-full rounded-xl bg-white/5 border border-white/10 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 px-4 py-3 text-white placeholder-white/40 outline-none transition;
+    @apply w-full rounded-2xl bg-slate-900/60 border border-white/10 focus:border-brand-400 focus:bg-slate-900/80 focus:ring-4 focus:ring-brand-500/20 px-5 py-3.5 text-white placeholder-slate-400 outline-none transition-all duration-300;
   }
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-3 py-1 text-xs font-medium text-white/80;
+    @apply inline-flex items-center gap-1.5 rounded-full bg-slate-800/80 border border-white/5 px-3.5 py-1.5 text-xs font-semibold text-slate-300 shadow-sm backdrop-blur-md;
   }
 }

@@ -1,53 +1,47 @@
-import axios from 'axios';
+import { createClient } from '@insforge/sdk';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const baseUrl = process.env.REACT_APP_INSFORGE_URL;
+const anonKey = process.env.REACT_APP_INSFORGE_ANON_KEY;
 
-const client = axios.create({
-  baseURL: BASE_URL,
-  timeout: 120000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const insforge = createClient({ baseUrl, anonKey });
 
-client.interceptors.response.use(
-  (r) => r,
-  (error) => {
-    const msg =
-      error?.response?.data?.error ||
-      error?.message ||
-      'Network error. Please try again.';
-    return Promise.reject(new Error(msg));
+const invoke = async (action, body = {}) => {
+  const { data, error } = await insforge.functions.invoke('interview', {
+    body: { action, ...body }
+  });
+  
+  if (error) {
+    throw new Error(error.message || 'Function invocation failed');
   }
-);
+  return data;
+};
 
 export const getOptions = async () => {
-  const { data } = await client.get('/interview/options');
-  return data;
+  return await invoke('options');
 };
 
 export const startInterview = async ({ role, difficulty, candidateName }) => {
-  const { data } = await client.post('/interview/start', {
-    role,
-    difficulty,
-    candidateName,
-  });
-  return data;
+  return await invoke('start', { role, difficulty, candidateName });
 };
 
-export const submitAnswer = async ({ sessionId, answer }) => {
-  const { data } = await client.post('/interview/answer', { sessionId, answer });
-  return data;
+export const submitAnswer = async ({ sessionId, question, answer, role }) => {
+  return await invoke('answer', { sessionId, question, answer, role });
 };
 
-export const getSummary = async (sessionId) => {
-  const { data } = await client.get(`/interview/summary/${sessionId}`);
-  return data;
+export const getSession = async ({ sessionId }) => {
+  return await invoke('get', { sessionId });
 };
 
-export default {
+export const getSummary = async ({ sessionId, role }) => {
+  return await invoke('summary', { sessionId, role });
+};
+
+const interviewApi = {
   getOptions,
   startInterview,
   submitAnswer,
+  getSession,
   getSummary,
 };
+
+export default interviewApi;

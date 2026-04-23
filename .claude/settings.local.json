@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Skill(claude-api)",
-      "Skill(claude-api:*)"
+      "Skill(claude-api:*)",
+      "Bash(xargs wc *)",
+      "Bash(curl -s http://localhost:5000/health)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":5000\")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(taskkill /PID 17844 /F)",
+      "PowerShell(Stop-Process -Id 17844 -Force)",
+      "Bash(unzip -o \"C:/Users/dell/Downloads/Ai Interviewer Project.zip\" -d \"C:/Users/dell/OneDrive/Desktop/ai-interview-coach/_zip_extract\")"
     ]
   }
 }

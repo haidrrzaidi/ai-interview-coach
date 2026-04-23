@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@insforge/sdk": "^1.2.5",
+    "@vercel/analytics": "^2.0.1"
+  }
+}
