@@ -20,7 +20,7 @@ export default async function(req) {
       anonKey: Deno.env.get('ANON_KEY')
     });
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY') || 'AIzaSyDsy7G8IWsJlDCcfOTdBZwonLdohXAmDYw';
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
 
     const callAI = async (prompt) => {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${apiKey}`;

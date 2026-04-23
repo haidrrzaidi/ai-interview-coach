@@ -1,174 +1,83 @@
 # AI Interview Coach
 
-A full-stack AI interview practice platform powered by **Claude Opus 4.7**.
-Pick a role (Frontend, Backend, DevOps, etc.) and a difficulty (Junior / Mid /
-Senior), get interviewed question-by-question, receive scored feedback on
-every answer, and finish with a personalised performance report and study
-plan.
+A full-stack AI interview practice platform powered by **Google Gemini 3.1 Pro Preview** and **Insforge Edge Functions**.
+Pick a role (Frontend, Backend, DevOps, etc.) and a difficulty (Junior / Mid / Senior), get interviewed question-by-question, receive scored feedback on every answer, and finish with a personalised performance report and study plan.
 
-## Tech stack
+## Tech Stack
 
 | Layer    | Stack                                                               |
 |----------|---------------------------------------------------------------------|
-| Backend  | Node.js · Express · `@anthropic-ai/sdk` · Claude Opus 4.7           |
-| Web      | React · Tailwind CSS · React Router · Axios                         |
-| Mobile   | React Native · Expo · React Navigation                              |
+| Backend  | Insforge Edge Functions · Deno · Google Generative Language API (Gemini 3.1 Pro Preview) |
+| Web      | React · Vite · Tailwind CSS · React Router · `@insforge/sdk`        |
+| Database | PostgreSQL (managed via Insforge)                                   |
 
-**AI features used:** adaptive thinking, prompt caching, streaming, structured
-JSON outputs.
+## Architecture
 
-## Repo structure
+This project has been modernized to run entirely on a serverless architecture using Insforge. 
 
 ```
 ai-interview-coach/
-├── backend/                 Node + Express + Claude API
-│   ├── server.js
-│   ├── routes/interview.js
-│   ├── controllers/interviewController.js
-│   ├── services/
-│   │   ├── claudeService.js   (adaptive thinking + prompt caching)
-│   │   └── sessionStore.js    (in-memory session store)
-│   └── middleware/
-│       ├── cors.js
-│       └── errorHandler.js
-├── web/                     React + Tailwind web client
-│   └── src/
-│       ├── pages/            Home.jsx · Interview.jsx · Summary.jsx
-│       ├── components/       QuestionCard · AnswerBox · FeedbackPanel · RoleSelector · ProgressBar
-│       ├── hooks/useInterview.js
-│       └── api/interviewApi.js
-├── mobile/                  React Native (Expo) app
-│   └── src/
-│       ├── screens/          HomeScreen · InterviewScreen · SummaryScreen
-│       ├── components/       QuestionCard · FeedbackPanel
-│       ├── hooks/useInterview.js
-│       └── api/interviewApi.js
-├── .gitignore
+├── functions/               Insforge Edge Functions (Deno)
+│   └── interview.js         The core AI logic and database communication
+├── web/                     React + Vite + Tailwind web client
+│   ├── src/
+│   │   ├── pages/           Home.jsx · Interview.jsx · Summary.jsx
+│   │   ├── components/      QuestionCard · AnswerBox · FeedbackPanel · RoleSelector
+│   │   ├── hooks/           useInterview.js
+│   │   └── api/             interviewApi.js (Insforge SDK integration)
+│   ├── index.html
+│   └── package.json
 └── README.md
 ```
 
-## Quick start
+## Quick Start (Local Development)
 
-### 1. Backend
+### 1. Backend Setup
 
-```bash
-cd backend
-cp .env.example .env          # then put your Claude key in .env
-npm install
-npm run dev                   # http://localhost:5000
-```
+The backend relies on Insforge Serverless Edge Functions. You do not need to run a local backend server. 
 
-Verify: `GET http://localhost:5000/health` should return
-`{ "status": "OK", "claudeKey": true }`.
+1. Create a new Insforge project.
+2. In your Insforge dashboard, add the following Environment Variables:
+   - `GEMINI_API_KEY`: Your Google Gemini API Key.
+3. Deploy the Edge Function using the Insforge CLI or MCP Tool:
+   ```bash
+   insforge functions deploy interview
+   ```
+4. A PostgreSQL table `interview_sessions` is required to store session data. Create it in your Insforge database.
 
-### 2. Web
+### 2. Web Frontend
 
-```bash
-cd web
-cp .env.example .env          # REACT_APP_API_URL=http://localhost:5000/api
-npm install
-npm start                     # http://localhost:3000
-```
+1. Navigate to the `web` directory.
+   ```bash
+   cd web
+   ```
+2. Set up your environment variables by copying `.env.example` to `.env` and adding your Insforge URL and Anon Key.
+   ```bash
+   VITE_INSFORGE_URL=https://<your-project-id>.insforge.app
+   VITE_INSFORGE_ANON_KEY=<your-anon-key>
+   ```
+3. Install dependencies and start the Vite development server:
+   ```bash
+   npm install
+   npm run dev
+   ```
+4. Open `http://localhost:5173` to view the app.
 
-### 3. Mobile (Expo)
+## How Gemini AI is Used
 
-```bash
-cd mobile
-npm install
-npm start                     # scan QR with Expo Go
-```
+The backend edge function (`functions/interview.js`) communicates directly with the Google Gemini REST API using native `fetch`. 
 
-Edit `mobile/app.json` `expo.extra.apiUrl` to point at your machine's LAN IP if
-testing on a physical device.
+The function exposes a single endpoint that handles multiple actions via a JSON body payload:
 
-## API
+1. **`start`**: Prompts Gemini to generate a fresh, relevant question based on the role and difficulty.
+2. **`answer`**: Submits the user's answer to Gemini to be evaluated (0-10 score, verdict, strengths, improvements, and a model answer). It concurrently fetches the next question to optimize latency.
+3. **`summary`**: Aggregates all Q&A data from the session and prompts Gemini to produce a final, comprehensive hiring report.
 
-Base path: `/api/interview`
+## Production Checklist
 
-| Method | Path                 | Body                                                                 |
-|--------|----------------------|----------------------------------------------------------------------|
-| GET    | `/options`           | —                                                                    |
-| POST   | `/start`             | `{ role, difficulty, candidateName? }`                               |
-| POST   | `/answer`            | `{ sessionId, question, answer, role? }`                             |
-| POST   | `/summary`           | `{ sessionId, role? }`                                               |
-| GET    | `/summary/:sessionId`| —                                                                    |
-
-### Response shapes
-
-**POST /start** →
-```json
-{
-  "sessionId": "uuid",
-  "question": { "id": "react-001", "question": "…", "topic": "React Hooks", "difficulty": "mid" },
-  "questionNumber": 1,
-  "totalQuestions": 5
-}
-```
-
-**POST /answer** →
-```json
-{
-  "feedback": {
-    "score": 7,
-    "verdict": "good",
-    "strengths": ["…"],
-    "improvements": ["…"],
-    "modelAnswer": "…"
-  },
-  "nextQuestion": { "id": "…", "question": "…", "topic": "…" },
-  "answeredCount": 1,
-  "isLastQuestion": false,
-  "totalQuestions": 5
-}
-```
-
-**POST /summary** →
-```json
-{
-  "summary": {
-    "overallScore": 7.2,
-    "overallVerdict": "promising",
-    "strongTopics": ["…"],
-    "weakTopics": ["…"],
-    "studyPlan": ["…"]
-  },
-  "results": [ /* every answered question with score + feedback */ ]
-}
-```
-
-## How Claude is used
-
-`backend/services/claudeService.js` wraps three Claude calls:
-
-1. **`generateQuestion(role, difficulty, askedIds)`** — asks for one fresh
-   question as JSON.
-2. **`scoreAnswer(question, userAnswer, role)`** — scores the candidate's
-   answer with strengths, improvements, and a model answer.
-3. **`generateSummary(role, results)`** — produces the final report from the
-   full results array.
-
-Every call uses:
-
-- **Model:** `claude-opus-4-7`
-- **Adaptive thinking:** `thinking: { type: "adaptive" }` — Claude decides
-  when and how much to reason.
-- **Prompt caching:** the interviewer system prompt is sent with
-  `cache_control: { type: "ephemeral" }`, so the cache hits from the second
-  request in a session onwards.
-- **Streaming:** `client.messages.stream(...).finalMessage()` so long
-  thinking sessions don't hit the request timeout.
-
-## Production checklist
-
-- Set `NODE_ENV=production` on the backend.
-- Set `CORS_ORIGINS` to your real web/mobile origins.
-- Protect the backend behind HTTPS (reverse proxy: Nginx / Caddy / Cloudflare).
-- Swap `sessionStore.js` for Redis or a database if you need multi-instance
-  deploys — the current store is in-memory and per-process.
-- Tune `RATE_LIMIT_MAX` for your traffic pattern.
-- Build the web client with `npm run build` and serve `web/build/` from a
-  static host (Vercel, Netlify, Cloudflare Pages, S3 + CloudFront).
-- For mobile, use `eas build` to produce App Store / Play Store artifacts.
+- Ensure the `GEMINI_API_KEY` is securely stored in Insforge Environment Variables (NOT hardcoded).
+- Ensure RLS (Row Level Security) is properly configured in the Insforge database if implementing user authentication.
+- Deploy the frontend `web` folder to Vercel, Netlify, or Insforge Hosting.
 
 ## License
 
