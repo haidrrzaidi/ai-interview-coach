@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "AI Interview Coach",
+    "slug": "ai-interview-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0b1020"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aiinterviewcoach.app"
+    },
+    "android": {
+      "package": "com.aiinterviewcoach.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1020"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:5000/api"
+    }
+  }
+}

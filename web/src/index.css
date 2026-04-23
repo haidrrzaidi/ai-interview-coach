@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #0b1020 0%, #141b3a 50%, #1b2d8c 100%);
+  color: #e6eaff;
+  min-height: 100vh;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+::-webkit-scrollbar-thumb { background: rgba(64,102,255,0.4); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(64,102,255,0.7); }
+
+@layer components {
+  .card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-semibold shadow-lg shadow-brand-900/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .input {
+    @apply w-full rounded-xl bg-white/5 border border-white/10 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30 px-4 py-3 text-white placeholder-white/40 outline-none transition;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-white/10 border border-white/10 px-3 py-1 text-xs font-medium text-white/80;
+  }
+}
